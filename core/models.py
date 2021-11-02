@@ -21,15 +21,16 @@ class UserManager(BaseUserManager):
 
         user = self.model(username=username, email=self.normalize_email(email))
         user.set_password(password)
-        user.otp = random.randint(1000,9999)
+        if not user.is_verified:
+            user.otp = random.randint(1000,9999)
+            # Send OTP email
+            send_mail(
+                subject="Verify your account",
+                message="OTP: {}".format(user.otp),
+                from_email="admin@ygag.com",
+                recipient_list=[user.email]
+            )
         user.save()
-        # Send OTP to email
-        send_mail(
-            subject="Verify your account",
-            message="OTP: {}".format(user.otp),
-            from_email="admin@ygag.com",
-            recipient_list=[user.email]
-        )
         return user
 
     def create_superuser(self, username, email, password):
