@@ -4,15 +4,22 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from core.serializers import RegistrationSerializer
-import random
+from core.throttle import CustomRateThrottle
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
 
 
 class ListUser(APIView):
     permission_classes = (IsAuthenticated,)
+    throttle_classes = [CustomRateThrottle]
 
     def get(self, request):
+        users = list(User.objects.values_list("email", flat=True))
         return Response(
-            {'message': 'Hello World'}
+            users,
+            status=status.HTTP_200_OK
         )
 
 
